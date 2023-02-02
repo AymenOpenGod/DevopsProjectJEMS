@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-deployment-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petclinic
+  template:
+    metadata:
+      labels:
+        app: petclinic
+    spec:
+      containers:
+        - name: postgresqldb
+          image: postgres:14.1
+          resources:
+            # Add resource requirements here
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD       
+              value: petclinic
+            - name: POSTGRES_USER
+              value: petclinic
+            - name: POSTGRES_DB
+              value: petclinic
+       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinic
+spec:
+  selector:
+    app: petclinic
+  ports:
+    - name: petclinic
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-deployment-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petclinic
+  template:
+    metadata:
+      labels:
+        app: petclinic
+    spec:
+      containers:
+        - name: petclinic
+          image: fathallahaymen/petclinic
+          resources:
+            # Add resource requirements here
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://petclinic:5432/petclinic
+            - name: SPRING_DATASOURCE_USERNAME
+              value: petclinic
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: petclinic
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+          

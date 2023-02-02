@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-deployment-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petclinic
+  template:
+    metadata:
+      labels:
+        app: petclinic
+    spec:
+      containers:
+        - name: petclinic
+          image: fathallahaymen/petclinic
+          resources:
+            # Add resource requirements here
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/petclinic
+            - name: SPRING_DATASOURCE_USERNAME
+              value: petclinic
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: petclinic
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+        
+
+
