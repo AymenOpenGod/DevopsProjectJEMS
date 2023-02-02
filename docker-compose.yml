@@ -15,7 +15,7 @@ version: "3.1"
  #
 services:
   API:
-    image: 'petclinic'
+    image: 'fathallahaymen/petclinic'
     ports:
       - "8080:8080"
     depends_on:
