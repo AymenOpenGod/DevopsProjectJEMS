@@ -1,0 +1,57 @@
+---
+- name: Install JDK 1.7
+  hosts: build_server
+  become: true
+  tasks:
+  - name: Download JDK 1.7
+    get_url:
+      url: https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz
+      dest: /tmp/jdk-7u80-linux-x64.tar.gz
+      headers:
+        Cookie: oraclelicense=accept-securebackup-cookie
+  - name: Extract JDK
+    unarchive:
+      src: /tmp/jdk-7u80-linux-x64.tar.gz
+      dest: /opt/
+      remote_src: true
+  - name: Update environment variables
+    lineinfile:
+      dest: /etc/environment
+      line: 'JAVA_HOME="/opt/jdk1.7.0_80"'
+      state: present
+      regexp: '^JAVA_HOME='
+
+  - name: Move JDK to /opt/jdk-17
+    become: true
+    command: mv /opt/jdk-17.0.2/ /opt/jdk-17/
+
+
+
+
+  - name: Set Java environment variables
+    become: true
+    lineinfile:
+      path: /home/vagrant/.bashrc
+      line: 'export JAVA_HOME=/opt/jdk-17'
+
+  - name: Update PATH with JAVA_HOME
+    become: true
+    lineinfile:
+      path: /home/vagrant/.bashrc
+      line: 'export PATH=$PATH:$JAVA_HOME/bin'
+
+  - name: Source bashrc
+    become: false
+    shell: . /home/vagrant/.bashrc
+
+
+
+
+
+
+
+  - name: Update alternatives
+    command: update-alternatives --install /usr/bin/java java /opt/jdk1.7.0_80/bin/java 1
+  - name: Set Java as default
+    command: update-alternatives --set java /opt/jdk1.7.0_80/bin/java
+

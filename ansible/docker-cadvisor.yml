@@ -1,0 +1,43 @@
+---
+- name: Install, enable, and start Docker and Docker Compose
+  hosts: staging_server
+  become: yes
+  tasks:
+    - name: Add the Docker CE repository
+      yum_repository:
+        name: docker-ce
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg
+        enabled: yes
+    - name: Install Docker CE package
+      yum:
+        name: docker-ce
+        state: latest
+    - name: Start and enable the Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+    - name: Check that Docker is running
+      shell: systemctl is-active docker
+      register: result
+      ignore_errors: true
+    - name: Install Docker Compose
+      shell: curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      args:
+        creates: /usr/local/bin/docker-compose
+    - name: Give execute permissions to the binary
+      file:
+        path: /usr/local/bin/docker-compose
+        mode: "u+x"
+    - name: Install Cadvisor
+      shell: docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --publish=8080:8080 --detach=true --name=cadvisor google/cadvisor:latest
+      register: result
+      ignore_errors: true
+    - name: Debug output
+      debug:
+        var: result
+
+

@@ -1,0 +1,48 @@
+- hosts: build_server
+  tasks:
+   - name: Install Maven
+     become: yes
+     package:
+       name: maven
+       state: latest
+   - name: setting up jenkins repo
+     become: yes
+     yum_repository:
+       name: jenkins
+       description: Jenkins-stable
+       baseurl: https://pkg.jenkins.io/redhat-stable
+       gpgcheck: 0
+
+   - name: downloading jenkins key
+     become: yes
+     rpm_key:
+       key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+       state: present
+       validate_certs: no
+   - name: updating yum
+     become: yes
+     yum:
+       name: yum
+       state: latest
+
+   - name: installing openjdk software
+     become: yes
+     yum:
+       name: "java-11-openjdk-devel"
+       state: present
+
+
+   - name: installing jenkins software
+     become: yes
+     yum:
+       name: jenkins
+       state: present
+
+
+   - name: start the service
+     become: yes
+     service:
+       name: jenkins
+       state: started
+
+
